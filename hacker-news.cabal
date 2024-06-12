@@ -61,10 +61,13 @@ executable hacker-news
     -- .hs or .lhs file containing the Main module.
     main-is:          Main.hs
 
+    ghc-options: -threaded -rtsopts -with-rtsopts=-N
+
     -- Modules included in this executable, other than Main.
     other-modules: HNI.Post
                  , HNI.Discriminate
                  , HNI.PrettyPrint
+                 , HNI.App
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
@@ -76,6 +79,10 @@ executable hacker-news
                     , regex-pcre
                     , time
                     , network-uri
+                    , brick
+                    , vty
+                    , ListZipper
+                    , text
 
 
     -- Directories containing source files.

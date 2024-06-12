@@ -1,4 +1,5 @@
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE FlexibleContexts #-}
 
 module HNI.Post where
 
@@ -21,7 +22,7 @@ data Post body = Post
     typ :: String,
     url :: Maybe String
   }
-  deriving (Generic, Show, Eq)
+  deriving (Generic, Show, Eq, Ord)
 
 instance (FromJSON body) => FromJSON (Post body) where
   parseJSON = genericParseJSON defaultOptions {fieldLabelModifier = camelTo2 '_' . renaming [("postId", "id"), ("typ", "type")]}

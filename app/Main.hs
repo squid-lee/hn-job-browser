@@ -3,10 +3,12 @@
 
 module Main where
 
+import Brick
 import Data.Aeson
 import qualified Data.ByteString.Lazy as BS
-import Data.Foldable (traverse_)
+import Data.List
 import Data.Maybe
+import HNI.App
 import HNI.Discriminate
 import HNI.Post
 import HNI.PrettyPrint
@@ -17,15 +19,23 @@ main = main1
 
 main1 :: IO ()
 main1 = do
-  as <- getArgs
-  (json, filter) <- case as of
-    [f] -> (,id) <$> BS.readFile f
-    [f, str] -> (,mapMaybe (regexp str)) <$> BS.readFile f
-    _ -> error "OH NO"
+  -- as <- getArgs
+  -- (json, filter) <- case as of
+  --   [f] -> (,id) <$> BS.readFile f
+  --   [f, strs] -> (,mapMaybe (regexen (split ',' strs))) <$> BS.readFile f
+  --   _ -> error "OH NO"
 
-  posts <- either error pure $ eitherDecode json
+  json <- BS.readFile "/tmp/hn-jun24.json"
 
-  traverse_ (putStrLn . ppPost) $ filter $ children posts
+  posts <- either error (pure . children) $ eitherDecode json
+
+  _ <- defaultMain app $ newState posts
+  return ()
+
+-- traverse_ (putStrLn . ppPost) $ filter $ children posts
+
+split :: (Eq a) => a -> [a] -> [[a]]
+split n = unfoldr (\xs -> if null xs then Nothing else let (l, r) = break (== n) xs in Just (l, drop 1 r))
 
 main2 :: IO ()
 main2 = putStrLn $ ppPost p

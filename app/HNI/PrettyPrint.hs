@@ -11,7 +11,7 @@ ppPost :: Post String -> String
 ppPost Post {..} = unlines [unwords [author, createdAt], ppText $ text] -- {text = ppText (text post)}
 
 ppText :: String -> String
-ppText = replacing [("&#x2F;", "/"), ("&#x27;", "'")] . removeTags . replacing [("<p>", ['\n'])]
+ppText = replacing [("&quot;", "'"), ("&amp;", "&"), ("&#x2F;", "/"), ("&#x27;", "'")] . removeTags . replacing [("<p>", ['\n'])]
   where
     removeTags "" = ""
     removeTags ('<' : s) = removeTags $ drop 1 . dropWhile (/= '>') $ s
