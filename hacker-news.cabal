@@ -84,6 +84,7 @@ executable hacker-news
                     , vty
                     , ListZipper
                     , text
+                    , Clipboard
 
 
     -- Directories containing source files.

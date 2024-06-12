@@ -3,14 +3,16 @@
 module HNI.App (newState, app) where
 
 import Brick
-import Data.List.Zipper
 -- import Data.Text
 
+import Control.Monad.IO.Class (liftIO)
+import Data.List.Zipper
 import GHC.Generics
 import Graphics.Vty (Event (..), Key (..), defAttr)
 import HNI.Post
 import HNI.PrettyPrint
 import HNI.Salience
+import System.Clipboard
 
 data State = State
   { -- TODO Zipper
@@ -47,6 +49,9 @@ appEvent (VtyEvent e) =
       modify $ \s -> s {posts = right $ posts s}
     EvKey (KChar 'p') [] ->
       modify $ \s -> s {posts = left $ posts s}
+    EvKey (KChar 'w') [] -> do
+      s <- get
+      liftIO $ setClipboardString $ text $ cursor $ posts s
     EvKey (KChar 'q') [] -> halt
     EvKey KEsc [] -> halt
     _ -> return ()
