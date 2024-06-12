@@ -1,12 +1,16 @@
+{-# LANGUAGE DeriveGeneric #-}
+
 module HNI.App (newState, app) where
 
 import Brick
 import Data.List.Zipper
 -- import Data.Text
 
+import GHC.Generics
 import Graphics.Vty (Event (..), Key (..), defAttr)
 import HNI.Post
 import HNI.PrettyPrint
+import HNI.Salience
 
 data State = State
   { -- TODO Zipper
@@ -27,7 +31,14 @@ app =
     }
 
 drawWidget :: State -> [Widget ()]
-drawWidget s = [str . ppPost . cursor . posts $ s]
+drawWidget s =
+  pure $
+    vBox
+      [ strWrap . ppPost $ p,
+        strWrap . unlines . map show . salients $ p
+      ]
+  where
+    p = cursor . posts $ s
 
 appEvent :: BrickEvent () e -> EventM () State ()
 appEvent (VtyEvent e) =
