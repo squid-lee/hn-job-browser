@@ -20,6 +20,6 @@ salients :: Post String -> [Salient]
 salients p = concatMap (mapMaybe (\(mkTag, regexp) -> mkTag <$> text p =~~ regexp)) [remoteness, salary, url, email]
   where
     remoteness = [(Location, "(?i)remote *\\(.*?\\)"), (Location, "(?i)remote|hybrid|on-?site")]
-    salary = [(Salary, "[\\d,.]*[kK]?[£$€][\\d,.]*[kK]?")]
+    salary = [(Salary, "[\\d,.]*[kK]?[£$€][\\d,.]*[kK]?"), (Salary, "(?i)equity")]
     url = [(URL, "(https?://(?:www\\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\\.[^\\s]{2,}|www\\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\\.[^\\s]{2,}|https?://(?:www\\.|(?!www))[a-zA-Z0-9]+\\.[^\\s]{2,}|www\\.[a-zA-Z0-9]+\\.[^\\s]{2,})")]
     email = [(Email, "[^@ ]+@[^@ ]+\\.[^@ ]+")]
