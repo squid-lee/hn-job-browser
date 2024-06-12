@@ -13,10 +13,13 @@ data Salient
   | Remoteness String
   | Tech String
   | URL String
+  | Email String
   deriving (Generic, Eq, Ord, Show)
 
 salients :: Post String -> [Salient]
-salients p = concatMap (mapMaybe (\(mkTag, regexp) -> mkTag <$> text p =~~ regexp)) [remoteness, salary]
+salients p = concatMap (mapMaybe (\(mkTag, regexp) -> mkTag <$> text p =~~ regexp)) [remoteness, salary, url, email]
   where
-    remoteness = [(\match -> Location match, "(?i)remote *\\(.*?\\)"), (\match -> Location match, "(?i)remote")]
-    salary = [(\match -> Salary match, "[\\d,.]*k?[£$€][\\d,.]*")]
+    remoteness = [(Location, "(?i)remote *\\(.*?\\)"), (Location, "(?i)remote|hybrid|on-?site")]
+    salary = [(Salary, "[\\d,.]*[kK]?[£$€][\\d,.]*[kK]?")]
+    url = [(URL, "(https?://(?:www\\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\\.[^\\s]{2,}|www\\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\\.[^\\s]{2,}|https?://(?:www\\.|(?!www))[a-zA-Z0-9]+\\.[^\\s]{2,}|www\\.[a-zA-Z0-9]+\\.[^\\s]{2,})")]
+    email = [(Email, "[^@ ]+@[^@ ]+\\.[^@ ]+")]
