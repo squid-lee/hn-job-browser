@@ -22,9 +22,16 @@ data Salient
   | Email Text
   deriving (Generic, Eq, Ord, Show)
 
--- pack is required because PCRE
 salients :: Post Decoded -> [Salient]
-salients p = nub $ concatMap (mapMaybe (\(mkTag, regexp) -> mkTag <$> matchM (make regexp) (payload (text p)))) [remoteness, salary, url, email]
+salients p =
+  nub
+    . concatMap (\(mkTag, regexp) -> mkTag <$> getAllTextMatches (match (make regexp) (payload (text p))))
+    . concat
+    $ [ remoteness,
+        salary,
+        url,
+        email
+      ]
   where
     -- mk :: String -> Regex
     make :: String -> Regex
@@ -33,9 +40,9 @@ salients p = nub $ concatMap (mapMaybe (\(mkTag, regexp) -> mkTag <$> matchM (ma
     -- 80k £80k 80k€ 80-130k€ £80k-£130k 80k-130k
     salary = [(Salary, "([£$€][[:digit:]]{2,}k?)|([[:digit:]]{2,}[k€£$]+)"), (Salary, "equity")]
     url = [(URL, "https?://[[:alnum:]]*\\.[[:alnum:].]*[[:alnum:]]+(/[^ ]*)?")]
-    email = [(Email, "[^@ ]+@[^@ .]+\\.[^@ ]*\\.[^@ .]*")]
+    email = [(Email, "[^@ ]+@[^@ .]+\\.[^@ ]+[^ @.]")]
 
     remoteness = [(Location, "remote( *\\w*)?"), (Location, "remote( *\\([^)]*\\))?"), (Location, "hybrid|on-?site"), (Location, knownPlaces)]
 
     knownPlaces :: String
-    knownPlaces = intercalate "|" ["amsterdam", "netherlands", "berlin", "germany", "vienna", "austria", "bristol", "london", "uk", "canada", "nyc", "sf", "bay.?area", "global", "worldwide"]
+    knownPlaces = intercalate "|" $ map (\s -> "\b" <> s <> "\b") ["amsterdam", "netherlands", "berlin", "germany", "vienna", "austria", "bristol", "london", "uk", "canada", "nyc", "sf", "bay.?area", "global", "worldwide", "us", "united states", "canada", "europe"]
