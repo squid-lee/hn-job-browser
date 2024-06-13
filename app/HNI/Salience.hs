@@ -5,26 +5,29 @@
 
 module HNI.Salience where
 
+import Data.Array as A
 import Data.List
-import Data.Maybe
 import Data.Text (Text)
 import GHC.Generics
 import HNI.Decoded
 import HNI.Post
 import Text.Regex.TDFA
 
+data Span = Span {offset :: Int, length :: Int}
+  deriving (Generic, Eq, Ord, Show)
+
 data Salient
-  = Location Text
-  | Salary Text
-  | Remoteness Text
-  | Tech Text
-  | URL Text
-  | Email Text
+  = Location Text Span
+  | Salary Text Span
+  | Remoteness Text Span
+  | Tech Text Span
+  | URL Text Span
+  | Email Text Span
   deriving (Generic, Eq, Ord, Show)
 
 salients :: Post Decoded -> [Salient]
 salients p =
-  concatMap (\(mkTag, regexp) -> mkTag <$> getAllTextMatches (match (make regexp) (payload (text p))))
+  concatMap (\(mkTag, regexp) -> map (uncurry mkTag . toSpan) $ matchAllText (make regexp) (payload (text p)))
     . concat
     $ [ location,
         remoteness,
@@ -33,7 +36,11 @@ salients p =
         email
       ]
   where
-    -- mk :: String -> Regex
+    toSpan :: MatchText Text -> (Text, Span)
+    toSpan m = (match, Span offset length)
+      where
+        (match, (offset, length)) = m A.! 0
+
     make :: String -> Regex
     make r = makeRegexOpts (defaultCompOpt {caseSensitive = False}) defaultExecOpt r
 

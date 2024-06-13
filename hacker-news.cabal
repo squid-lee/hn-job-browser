@@ -80,6 +80,7 @@ executable hacker-news
                     , bytestring
                     , regex-tdfa
                     , regex-base
+                    , array
                     , time
                     , html-entity
                     , brick

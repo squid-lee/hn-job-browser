@@ -18,12 +18,12 @@ ppSalient =
   pad
     . fmap T.strip
     . \case
-      Location x -> ("Location", x)
-      Salary x -> ("Salary", x)
-      Remoteness x -> ("Remoteness", T.toTitle x)
-      Tech x -> ("Tech", x)
-      URL x -> ("URL", x)
-      Email x -> ("Email", x)
+      Location x _ -> ("Location", x)
+      Salary x _ -> ("Salary", x)
+      Remoteness x _ -> ("Remoteness", T.toTitle x)
+      Tech x _ -> ("Tech", x)
+      URL x _ -> ("URL", x)
+      Email x _ -> ("Email", x)
   where
     ctors = ["Location", "Salary", "Remoteness", "Tech", "URL", "Email"]
     len = maximum $ map T.length ctors
