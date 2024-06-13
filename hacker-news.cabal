@@ -69,6 +69,7 @@ executable hacker-news
                  , HNI.PrettyPrint
                  , HNI.App
                  , HNI.Salience
+                 , HNI.Decoded
 
     -- LANGUAGE extensions used by modules in this package.
     default-extensions: OverloadedStrings
@@ -80,7 +81,7 @@ executable hacker-news
                     , regex-pcre
                     , regex-base
                     , time
-                    , network-uri
+                    , html-entity
                     , brick
                     , vty
                     , ListZipper

@@ -5,6 +5,7 @@ module HNI.Salience where
 import Data.Maybe
 import Data.Text (Text, pack, unpack)
 import GHC.Generics
+import HNI.Decoded
 import HNI.Post
 import Text.Regex.PCRE
 
@@ -18,8 +19,8 @@ data Salient
   deriving (Generic, Eq, Ord, Show)
 
 -- pack is required because PCRE
-salients :: Post Text -> [Salient]
-salients p = concatMap (mapMaybe (\(mkTag, regexp) -> mkTag . pack <$> (unpack $ text p) =~~ (regexp :: String))) [remoteness, salary, url, email]
+salients :: Post Decoded -> [Salient]
+salients p = concatMap (mapMaybe (\(mkTag, regexp) -> mkTag . pack <$> unpack (payload $ text p) =~~ (regexp :: String))) [remoteness, salary, url, email]
   where
     remoteness = [(Location, "(?i)remote *\\(.*?\\)"), (Location, "(?i)remote|hybrid|on-?site")]
     salary = [(Salary, "[\\d,.]*[kK]?[£$€][\\d,.]*[kK]?"), (Salary, "(?i)equity")]

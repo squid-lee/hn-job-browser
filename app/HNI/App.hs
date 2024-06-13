@@ -1,25 +1,21 @@
-{-# LANGUAGE DeriveGeneric #-}
-
 module HNI.App (newState, app) where
 
 import Brick
--- import Data.Text
-
 import Control.Monad.IO.Class (liftIO)
 import Data.List.Zipper
-import Data.Text (Text)
 import qualified Data.Text as T
 import Graphics.Vty (Event (..), Key (..), defAttr)
+import HNI.Decoded
 import HNI.Post
 import HNI.PrettyPrint
 import HNI.Salience
 import System.Clipboard
 
 data State = State
-  { posts :: Zipper (Post Text)
+  { posts :: Zipper (Post Decoded)
   }
 
-newState :: [Post Text] -> State
+newState :: [Post Decoded] -> State
 newState xs = State $ fromList xs
 
 app :: App State event ()
@@ -37,7 +33,8 @@ drawWidget s =
   pure $
     vBox
       [ txtWrap . ppPost $ p,
-        txtWrap . T.pack . unlines . map show . salients $ p
+        strWrap " ",
+        txtWrap . T.unlines . map ppSalients . salients $ p
       ]
   where
     p = cursor . posts $ s
@@ -51,7 +48,7 @@ appEvent (VtyEvent e) =
       modify $ \s -> s {posts = left $ posts s}
     EvKey (KChar 'w') [] -> do
       s <- get
-      liftIO $ setClipboardString $ T.unpack $ text $ cursor $ posts s
+      liftIO $ setClipboardString $ T.unpack $ payload $ text $ cursor $ posts s
     EvKey (KChar 'q') [] -> halt
     EvKey KEsc [] -> halt
     _ -> return ()
