@@ -30,9 +30,12 @@ salients p = nub $ concatMap (mapMaybe (\(mkTag, regexp) -> mkTag <$> matchM (ma
     make :: String -> Regex
     make r = makeRegexOpts (defaultCompOpt {caseSensitive = False}) defaultExecOpt r
 
-    remoteness = [(Location, "remote( *\\w*)?"), (Location, "remote( *\\([^)]*\\))?"), (Location, "hybrid|on-?site")]
-
     -- 80k £80k 80k€ 80-130k€ £80k-£130k 80k-130k
     salary = [(Salary, "([£$€][[:digit:]]{2,}k?)|([[:digit:]]{2,}[k€£$]+)"), (Salary, "equity")]
     url = [(URL, "https?://[[:alnum:]]*\\.[[:alnum:].]*[[:alnum:]]+(/[^ ]*)?")]
-    email = [(Email, "[^@ ]+@[^@ .]+\\.[^@ ]+")]
+    email = [(Email, "[^@ ]+@[^@ .]+\\.[^@ ]*\\.[^@ .]*")]
+
+    remoteness = [(Location, "remote( *\\w*)?"), (Location, "remote( *\\([^)]*\\))?"), (Location, "hybrid|on-?site"), (Location, knownPlaces)]
+
+    knownPlaces :: String
+    knownPlaces = intercalate "|" ["amsterdam", "netherlands", "berlin", "germany", "vienna", "austria", "bristol", "london", "uk", "canada", "nyc", "sf", "bay.?area", "global", "worldwide"]
