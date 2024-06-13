@@ -78,7 +78,7 @@ executable hacker-news
     build-depends:    base ^>=4.18.2.1
                     , aeson
                     , bytestring
-                    , regex-pcre
+                    , regex-tdfa
                     , regex-base
                     , time
                     , html-entity
