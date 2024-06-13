@@ -1,6 +1,8 @@
 module HNI.App (newState, app) where
 
 import Brick
+import Brick.Widgets.Border
+import Brick.Widgets.Border.Style
 import Control.Monad.IO.Class (liftIO)
 import Data.List
 import Data.List.Zipper
@@ -32,11 +34,12 @@ app =
 drawWidget :: State -> [Widget ()]
 drawWidget s =
   pure $
-    vBox
-      [ txtWrap . ppPost $ p,
-        strWrap " ",
-        txtWrap . T.unlines . nub . map ppSalient . salients $ p
-      ]
+    vBox $
+      map
+        (padLeftRight 2 . withBorderStyle unicode . border . txtWrap)
+        [ ppPost p,
+          T.unlines . nub . map ppSalient . salients $ p
+        ]
   where
     p = cursor . posts $ s
 
