@@ -1,16 +1,16 @@
 {-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE FlexibleContexts #-}
 
 module HNI.Post where
 
 import Data.Aeson
+import Data.Text
 import GHC.Generics
 
 -- The top level Post (ie the whole jobs thread) is also a Post
 data Post body = Post
-  { author :: String,
+  { author :: Text,
     children :: [Post body],
-    createdAt :: String,
+    createdAt :: Text,
     createdAtI :: Int,
     postId :: Int,
     options :: [()],
@@ -18,9 +18,9 @@ data Post body = Post
     points :: Maybe Int,
     storyId :: Int,
     text :: body,
-    title :: Maybe String,
-    typ :: String,
-    url :: Maybe String
+    title :: Maybe Text,
+    typ :: Text,
+    url :: Maybe Text
   }
   deriving (Generic, Show, Eq, Ord)
 

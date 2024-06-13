@@ -7,7 +7,8 @@ import Brick
 
 import Control.Monad.IO.Class (liftIO)
 import Data.List.Zipper
-import GHC.Generics
+import Data.Text (Text)
+import qualified Data.Text as T
 import Graphics.Vty (Event (..), Key (..), defAttr)
 import HNI.Post
 import HNI.PrettyPrint
@@ -15,11 +16,10 @@ import HNI.Salience
 import System.Clipboard
 
 data State = State
-  { -- TODO Zipper
-    posts :: Zipper (Post String)
+  { posts :: Zipper (Post Text)
   }
 
-newState :: [Post String] -> State
+newState :: [Post Text] -> State
 newState xs = State $ fromList xs
 
 app :: App State event ()
@@ -36,8 +36,8 @@ drawWidget :: State -> [Widget ()]
 drawWidget s =
   pure $
     vBox
-      [ strWrap . ppPost $ p,
-        strWrap . unlines . map show . salients $ p
+      [ txtWrap . ppPost $ p,
+        txtWrap . T.pack . unlines . map show . salients $ p
       ]
   where
     p = cursor . posts $ s
@@ -51,7 +51,7 @@ appEvent (VtyEvent e) =
       modify $ \s -> s {posts = left $ posts s}
     EvKey (KChar 'w') [] -> do
       s <- get
-      liftIO $ setClipboardString $ text $ cursor $ posts s
+      liftIO $ setClipboardString $ T.unpack $ text $ cursor $ posts s
     EvKey (KChar 'q') [] -> halt
     EvKey KEsc [] -> halt
     _ -> return ()

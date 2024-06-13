@@ -2,28 +2,35 @@
 
 module HNI.PrettyPrint where
 
-import Data.List
+import Data.Text (Text)
+import qualified Data.Text as T
 import HNI.Post
-import Network.URI
+
+-- import Network.URI
 
 -- TODO polymorphic over body:
-ppPost :: Post String -> String
-ppPost Post {..} = unlines [unwords [author, createdAt], ppText $ text] -- {text = ppText (text post)}
+ppPost :: Post Text -> Text
+ppPost Post {..} = T.unlines [T.unwords [author, createdAt], ppText $ text] -- {text = ppText (text post)}
 
-ppText :: String -> String
-ppText = replacing [("&quot;", "'"), ("&amp;", "&"), ("&#x2F;", "/"), ("&#x27;", "'")] . removeTags . replacing [("<p>", ['\n'])]
+ppText :: Text -> Text
+ppText =
+  replacing [("&quot;", "'"), ("&amp;", "&"), ("&#x2F;", "/"), ("&#x27;", "'")]
+    . removeTags
+    . replacing [("<p>", "\n")]
   where
-    removeTags "" = ""
-    removeTags ('<' : s) = removeTags $ drop 1 . dropWhile (/= '>') $ s
-    removeTags (x : s) = x : removeTags s
+    removeTags s = case T.uncons s of
+      Nothing -> s
+      Just ('<', s) -> removeTags $ T.drop 1 . T.dropWhile (/= '>') $ s
+      Just (x, s) -> T.cons x $ removeTags s
 
 -- TODO: SLOW
-replacing :: [(String, String)] -> String -> String
+replacing :: [(Text, Text)] -> Text -> Text
 replacing tblTop s = go tblTop s
   where
-    go [] "" = ""
-    go [] (x : xs) = x : go tblTop xs
+    go [] s = case T.uncons s of
+      Nothing -> s
+      Just (x, xs) -> T.cons x $ go tblTop xs
     go ((pref, replace) : tbl) s =
-      case stripPrefix pref s of
+      case T.stripPrefix pref s of
         Nothing -> go tbl s
-        Just s' -> replace ++ go tblTop s'
+        Just s' -> T.append replace $ go tblTop s'
