@@ -2,6 +2,7 @@ module HNI.App (newState, app) where
 
 import Brick
 import Control.Monad.IO.Class (liftIO)
+import Data.List
 import Data.List.Zipper
 import qualified Data.Text as T
 import Graphics.Vty (Event (..), Key (..), defAttr)
@@ -34,7 +35,7 @@ drawWidget s =
     vBox
       [ txtWrap . ppPost $ p,
         strWrap " ",
-        txtWrap . T.unlines . map ppSalients . salients $ p
+        txtWrap . T.unlines . nub . map ppSalient . salients $ p
       ]
   where
     p = cursor . posts $ s

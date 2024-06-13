@@ -24,10 +24,10 @@ data Salient
 
 salients :: Post Decoded -> [Salient]
 salients p =
-  nub
-    . concatMap (\(mkTag, regexp) -> mkTag <$> getAllTextMatches (match (make regexp) (payload (text p))))
+  concatMap (\(mkTag, regexp) -> mkTag <$> getAllTextMatches (match (make regexp) (payload (text p))))
     . concat
-    $ [ remoteness,
+    $ [ location,
+        remoteness,
         salary,
         url,
         email
@@ -38,11 +38,25 @@ salients p =
     make r = makeRegexOpts (defaultCompOpt {caseSensitive = False}) defaultExecOpt r
 
     -- 80k £80k 80k€ 80-130k€ £80k-£130k 80k-130k
-    salary = [(Salary, "([£$€][[:digit:]]{2,}k?)|([[:digit:]]{2,}[k€£$]+)"), (Salary, "equity")]
+    salary =
+      [ (Salary, "([£$€][[:digit:]]{2,}k?)|([[:digit:]]{2,}[k€£$]+)"),
+        (Salary, "equity")
+      ]
     url = [(URL, "https?://[[:alnum:]]*\\.[[:alnum:].]*[[:alnum:]]+(/[^ ]*)?")]
     email = [(Email, "[^@ ]+@[^@ .]+\\.[^@ ]+[^ @.]")]
 
-    remoteness = [(Location, "remote( *\\w*)?"), (Location, "remote( *\\([^)]*\\))?"), (Location, "hybrid|on-?site"), (Location, knownPlaces)]
+    location =
+      [ (Location, knownPlaces)
+      ]
+
+    remoteness =
+      [ (Remoteness, "remote( *\\w*)?"),
+        (Remoteness, "remote( *\\([^)]*\\))?"),
+        (Remoteness, "hybrid|on-?site")
+      ]
 
     knownPlaces :: String
-    knownPlaces = intercalate "|" $ map (\s -> "\b" <> s <> "\b") ["amsterdam", "netherlands", "berlin", "germany", "vienna", "austria", "bristol", "london", "uk", "canada", "nyc", "sf", "bay.?area", "global", "worldwide", "us", "united states", "canada", "europe"]
+    knownPlaces =
+      intercalate "|"
+        . map (\s -> "\\b" <> s <> "\\b")
+        $ ["amsterdam", "netherlands", "berlin", "germany", "vienna", "austria", "bristol", "london", "uk", "canada", "nyc", "sf", "bay.?area", "global", "worldwide", "us", "united states", "canada", "europe"]
