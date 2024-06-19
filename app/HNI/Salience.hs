@@ -59,4 +59,4 @@ salients p =
     knownPlaces =
       intercalate "|"
         . map (\s -> "\\b" <> s <> "\\b")
-        $ ["amsterdam", "netherlands", "berlin", "germany", "vienna", "austria", "bristol", "london", "uk", "canada", "nyc", "sf", "bay.?area", "global", "worldwide", "us", "united states", "canada", "europe"]
+        $ ["amsterdam", "netherlands", "berlin", "germany", "vienna", "austria", "bristol", "london", "uk", "canada", "nyc", "sf", "bay.?area", "global", "worldwide", "us", "united states", "canada", "latin america", "europe"]
