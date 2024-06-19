@@ -42,10 +42,12 @@
               haskellPackages.cabal-install
               haskellPackages.ormolu
 
-              # nixpkgsFor.${system}.zlib
+              nixpkgsFor.${system}.zlib
 
               # self.packages.${system}.checklist-trunc-tables
             ];
+
+            nativeBuildInputs = [ haskellPackages.hsc2hs ];
           };
         });
     };

@@ -6,13 +6,10 @@ module Main where
 import Brick
 import Brick.Highlight (txtWrapHighlight)
 import Brick.Span
-import Data.Aeson
-import qualified Data.ByteString.Lazy as BS
 import qualified Data.Text as T
 import Graphics.Vty.Attributes.Color
 import HNI.App
-import HNI.Decoded
-import HNI.Post
+import HNI.Fetch
 import Text.Wrap (defaultWrapSettings)
 
 main :: IO ()
@@ -26,9 +23,8 @@ main1 = do
   --   [f, strs] -> (,mapMaybe (regexen (split ',' strs))) <$> BS.readFile f
   --   _ -> error "OH NO"
 
-  json <- BS.readFile "/tmp/hn-jun24.json"
-
-  posts <- either error (pure . children . fmap HNI.Decoded.decode) (eitherDecode json)
+  let jun24 = 40563283
+  posts <- fetchCached jun24
 
   _ <- defaultMain app $ newState posts
   return ()

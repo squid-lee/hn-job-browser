@@ -70,6 +70,7 @@ executable hacker-news
                  , HNI.App
                  , HNI.Salience
                  , HNI.Decoded
+                 , HNI.Fetch
                  , Brick.Highlight
                  , Brick.Span
 
@@ -85,6 +86,7 @@ executable hacker-news
                     , array
                     , time
                     , html-entity
+                    , http-client
                     , brick
                     , vty
                     , ListZipper
@@ -93,6 +95,8 @@ executable hacker-news
                     , word-wrap
                     , microlens
                     , deepseq
+                    , http-client-tls
+                    , directory
 
     -- Directories containing source files.
     hs-source-dirs:   app
