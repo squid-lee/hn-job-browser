@@ -70,6 +70,8 @@ executable hacker-news
                  , HNI.App
                  , HNI.Salience
                  , HNI.Decoded
+                 , Brick.Highlight
+                 , Brick.Span
 
     -- LANGUAGE extensions used by modules in this package.
     default-extensions: OverloadedStrings
@@ -88,7 +90,9 @@ executable hacker-news
                     , ListZipper
                     , text
                     , Clipboard
-
+                    , word-wrap
+                    , microlens
+                    , deepseq
 
     -- Directories containing source files.
     hs-source-dirs:   app

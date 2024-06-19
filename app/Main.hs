@@ -1,11 +1,19 @@
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+
+{-# HLINT ignore "Use const" #-}
 module Main where
 
 import Brick
+import Brick.Highlight (txtWrapHighlight)
+import Brick.Span
 import Data.Aeson
 import qualified Data.ByteString.Lazy as BS
+import qualified Data.Text as T
+import Graphics.Vty.Attributes.Color
 import HNI.App
 import HNI.Decoded
 import HNI.Post
+import Text.Wrap (defaultWrapSettings)
 
 main :: IO ()
 main = main1
@@ -24,3 +32,11 @@ main1 = do
 
   _ <- defaultMain app $ newState posts
   return ()
+
+main2 :: IO ()
+main2 = defaultMain app ()
+  where
+    xs :: Widget ()
+    xs = txtWrapHighlight [(Span 10 10, attrName "X"), (Span 32 7, attrName "X"), (Span 40 10, attrName "X")] defaultWrapSettings (T.replicate 1 (T.replicate 80 "X" <> " "))
+
+    app = App (\_ -> [xs]) neverShowCursor (\_ -> halt) (return ()) (const (attrMap (fg blue) [(attrName "X", fg red)]))

@@ -1,10 +1,11 @@
 {-# LANGUAGE DeriveGeneric #-}
-{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
-
 {-# HLINT ignore "Eta reduce" #-}
+{-# LANGUAGE LambdaCase #-}
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
 
 module HNI.Salience where
 
+import Brick.Span
 import Data.Array as A
 import Data.List
 import Data.Text (Text)
@@ -12,9 +13,6 @@ import GHC.Generics
 import HNI.Decoded
 import HNI.Post
 import Text.Regex.TDFA
-
-data Span = Span {offset :: Int, length :: Int}
-  deriving (Generic, Eq, Ord, Show)
 
 data Salient
   = Location Text Span
@@ -67,3 +65,12 @@ salients p =
       intercalate "|"
         . map (\s -> "\\b" <> s <> "\\b")
         $ ["amsterdam", "netherlands", "berlin", "germany", "vienna", "austria", "bristol", "london", "uk", "canada", "nyc", "sf", "bay.?area", "global", "worldwide", "us", "united states", "canada", "latin america", "europe"]
+
+getSpan :: Salient -> Span
+getSpan = \case
+  Location _ s -> s
+  Salary _ s -> s
+  Remoteness _ s -> s
+  Tech _ s -> s
+  URL _ s -> s
+  Email _ s -> s
