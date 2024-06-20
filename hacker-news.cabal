@@ -97,6 +97,7 @@ executable hacker-news
                     , deepseq
                     , http-client-tls
                     , directory
+                    , process
 
     -- Directories containing source files.
     hs-source-dirs:   app

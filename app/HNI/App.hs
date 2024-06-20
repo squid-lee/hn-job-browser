@@ -17,6 +17,7 @@ import HNI.Post
 import HNI.PrettyPrint
 import HNI.Salience
 import System.Clipboard
+import System.Process
 import Text.Wrap (defaultWrapSettings)
 
 data State = State
@@ -46,6 +47,10 @@ appEvent (VtyEvent e) =
     EvKey (KChar 'w') [] -> do
       s <- get
       liftIO $ setClipboardString $ T.unpack $ payload $ text $ cursor $ posts s
+      continueWithoutRedraw
+    EvKey (KChar 'o') [] -> do
+      s <- get
+      liftIO $ browse $ cursor $ posts s
       continueWithoutRedraw
     EvKey (KChar 'q') [] -> halt
     EvKey KEsc [] -> halt
@@ -77,3 +82,10 @@ color xs = zip xs $ cycle highlightAttrNames
 
 highlightAttrNames :: [AttrName]
 highlightAttrNames = map (attrName . ("highlight" ++) . show) [1 .. 4 :: Int]
+
+browse :: Post a -> IO ()
+browse Post {..} = do
+  case parentId of
+    Nothing -> return ()
+    -- Injection possible (though pId / postId are Int)
+    Just pId -> (>> return ()) $ spawnCommand $ concat ["xdg-open ", "https://news.ycombinator.com/item?id=", show pId, "#", show postId]
