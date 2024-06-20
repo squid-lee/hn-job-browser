@@ -21,6 +21,7 @@ data Salient
   | Tech Text Span
   | URL Text Span
   | Email Text Span
+  | Purpose Text Span
   deriving (Generic, Eq, Ord, Show)
 
 salients :: Post Decoded -> [Salient]
@@ -31,7 +32,8 @@ salients p =
         remoteness,
         salary,
         url,
-        email
+        email,
+        purpose
       ]
   where
     toSpan :: MatchText Text -> (Text, Span)
@@ -57,7 +59,7 @@ salients p =
     remoteness =
       [ (Remoteness, "remote( *\\w*)?"),
         (Remoteness, "remote( *\\([^)]*\\))?"),
-        (Remoteness, "hybrid|on-?site")
+        (Remoteness, "hybrid|on-?site|in-?person")
       ]
 
     knownPlaces :: String
@@ -65,6 +67,8 @@ salients p =
       intercalate "|"
         . map (\s -> "\\b" <> s <> "\\b")
         $ ["amsterdam", "netherlands", "berlin", "germany", "vienna", "austria", "bristol", "london", "uk", "canada", "nyc", "sf", "bay.?area", "global", "worldwide", "us", "united states", "canada", "latin america", "europe"]
+
+    purpose = [(Purpose, "blockchain"), (Purpose, "web3(.0)?"), (Purpose, "nft")]
 
 getSpan :: Salient -> Span
 getSpan = \case
