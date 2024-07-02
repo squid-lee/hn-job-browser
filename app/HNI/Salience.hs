@@ -78,3 +78,4 @@ getSpan = \case
   Tech _ s -> s
   URL _ s -> s
   Email _ s -> s
+  Purpose _ s -> s

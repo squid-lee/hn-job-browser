@@ -24,6 +24,7 @@ ppSalient =
       Tech x _ -> ("Tech", x)
       URL x _ -> ("URL", x)
       Email x _ -> ("Email", x)
+      Purpose x _ -> ("Purpose", x)
   where
     ctors = ["Location", "Salary", "Remoteness", "Tech", "URL", "Email"]
     len = maximum $ map T.length ctors
