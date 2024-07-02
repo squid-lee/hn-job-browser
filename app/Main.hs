@@ -24,7 +24,8 @@ main1 = do
   --   _ -> error "OH NO"
 
   let jun24 = 40563283
-  posts <- fetchCached jun24
+      jul24 = 40846428
+  posts <- fetchCached jul24
 
   _ <- defaultMain app $ newState posts
   return ()
