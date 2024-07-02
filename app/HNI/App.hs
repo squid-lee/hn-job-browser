@@ -59,9 +59,9 @@ appEvent _ = return ()
 
 drawWidget :: State -> [Widget ()]
 drawWidget s =
-  pure $ drawPost p
-  where
-    p = cursor . posts $ s
+  pure $ case safeCursor $ posts s of
+    Just p -> drawPost p
+    Nothing -> txt "Seen all listings"
 
 drawPost :: Post Decoded -> Widget ()
 drawPost p@Post {..} =
