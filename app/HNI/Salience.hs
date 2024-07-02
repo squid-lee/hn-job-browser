@@ -49,8 +49,8 @@ salients p =
       [ (Salary, "([£$€][[:digit:]]{2,}k?)|([[:digit:]]{2,}[k€£$]+)"),
         (Salary, "equity")
       ]
-    url = [(URL, "https?://[[:alnum:]]*\\.[[:alnum:].]*[[:alnum:]]+(/[^ ]*)?")]
-    email = [(Email, "[^@ ]+@[^@ .]+\\.[^@ ]+[^ @.]")]
+    url = [(URL, "https?://[[:alnum:]]*\\.[[:alnum:].-]*[[:alnum:]]+(/[^ ,]*)?")]
+    email = [(Email, "[^@ ]+@[^@ .]+\\.[^@ ]+[^ @.,]")]
 
     location =
       [ (Location, knownPlaces)
