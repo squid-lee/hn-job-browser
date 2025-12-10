@@ -4,10 +4,13 @@
   inputs.nixpkgs.url = "nixpkgs";
   outputs = { self, nixpkgs }:
     let
-      supportedSystems = [ "x86_64-linux" ];
       forAllSystems = f:
         nixpkgs.lib.genAttrs supportedSystems (system: f system);
       nixpkgsFor = forAllSystems (system:
+      supportedSystems = [
+        "x86_64-linux"
+        "aarch64-darwin"
+      ];
         import nixpkgs {
           system = system;
           overlays = [ self.overlays.default ];
