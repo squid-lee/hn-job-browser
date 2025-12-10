@@ -3,7 +3,6 @@ module Brick.Highlight (txtWrapHighlight, fixUpsSpans, lineStarts) where
 import Brick
 import Brick.Span
 import Control.DeepSeq
-import Data.Char
 import Data.List
 import Data.Maybe
 import qualified Data.Text as T
