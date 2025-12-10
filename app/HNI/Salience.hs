@@ -85,14 +85,14 @@ salients p =
       i
         $ intercalate "|"
           . map (\s -> "\\b" <> s <> "\\b")
-        $ ["amsterdam", "netherlands", "berlin", "germany", "vienna", "austria", "bristol", "london", "uk", "canada", "nyc", "sf", "bay.?area", "global", "worldwide", "united states", "canada", "latin america", "europe", "lisbon", "portugal", "stockholm", "sweden", "ghent", "belgium", "paris", "france"]
+        $ ["amsterdam", "netherlands", "berlin", "germany", "vienna", "austria", "bristol", "london", "uk", "canada", "nyc", "sf", "bay.?area", "global", "worldwide", "united states", "canada", "latin america", "europe", "lisbon", "portugal", "san francisco", "los angeles", "stockholm", "sweden", "ghent", "belgium", "paris", "france"]
 
     knownPlacesR :: Regex
     knownPlacesR =
       r
         $ intercalate "|"
           . map (\s -> "\\b" <> s <> "\\b")
-        $ ["us"]
+        $ "US" : ["AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "DC", "FL", "GA", "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD", "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ", "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"]
 
     role =
       [ (Role, i "(senior|staff|principal|lead|junior|founding)[ -]*(software|frontend|backend|fullstack|full-stack|platform|data|ml|ai|devops|sre|infrastructure|systems?)[ -]*(engineer|developer)?"),
