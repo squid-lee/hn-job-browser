@@ -4,6 +4,7 @@
 module HNI.Post where
 
 import Data.Aeson
+import Data.Maybe (fromMaybe)
 import Data.Text
 import GHC.Generics
 
@@ -29,4 +30,4 @@ instance (FromJSON body) => FromJSON (Post body) where
   parseJSON = genericParseJSON defaultOptions {fieldLabelModifier = camelTo2 '_' . renaming [("postId", "id"), ("typ", "type")]}
 
 renaming :: [(String, String)] -> String -> String
-renaming table s = maybe s (\x -> x) $ lookup s table
+renaming table s = fromMaybe s $ lookup s table

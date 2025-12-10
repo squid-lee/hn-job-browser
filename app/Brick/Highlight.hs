@@ -33,7 +33,7 @@ txtWrapHighlight highlightSpans settings s =
             lineImg (spans, lStr) =
               let rPad = V.text' (c ^. attrL) $ T.replicate (maxLength - textWidth lStr) " "
                in V.horizCat [txtAttrSpans (c ^. attrL) spans lStr, rPad]
-         in return $ emptyResult & imageL .~ (V.horizCat [V.vertCat lineImgs, padding])
+         in return $ emptyResult & imageL .~ V.horizCat [V.vertCat lineImgs, padding]
 
 -- Compute where each wrapped line starts in the original text
 lineStarts :: T.Text -> [T.Text] -> [Int]

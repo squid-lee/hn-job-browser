@@ -1,7 +1,9 @@
 {-# LANGUAGE DeriveGeneric #-}
-{-# HLINT ignore "Eta reduce" #-}
 {-# LANGUAGE LambdaCase #-}
 {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+
+{-# HLINT ignore "Eta reduce" #-}
+{-# HLINT ignore "Evaluate" #-}
 
 module HNI.Salience where
 

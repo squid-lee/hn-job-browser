@@ -9,11 +9,11 @@
         "x86_64-linux"
         "aarch64-darwin"
       ];
-      forAllSystems = f: nixpkgs.lib.genAttrs supportedSystems (system: f system);
+      forAllSystems = f: nixpkgs.lib.genAttrs supportedSystems f;
       nixpkgsFor = forAllSystems (
         system:
         import nixpkgs {
-          system = system;
+          inherit system;
           overlays = [ self.overlays.default ];
         }
       );
@@ -29,15 +29,19 @@
           runtimeInputs = [
             pkgs.git
             pkgs.haskellPackages.ormolu
+            pkgs.haskellPackages.hlint
             pkgs.nixfmt-rfc-style
+            pkgs.statix
           ];
           text = ''
             git ls-files -z '*.hs' | xargs -0 ormolu --mode inplace
+            git ls-files -z '*.hs' | xargs -0 hlint
             git ls-files -z '*.nix' | xargs -0 nixfmt
+            git ls-files -z '*.nix' | xargs -0 statix check
           '';
         }
       );
-      overlays.default = (final: prev: { dist = final.haskellPackages.callCabal2nix "hnj" ./. { }; });
+      overlays.default = final: prev: { dist = final.haskellPackages.callCabal2nix "hnj" ./. { }; };
       packages = forAllSystems (
         system:
         let
@@ -45,7 +49,7 @@
         in
         {
           default = self.packages.${system}.dist;
-          dist = pkgs.dist;
+          inherit (pkgs) dist;
           # checklist-trunc-tables =
           #             pkgs.writeShellApplication {
           #               name = "kk-trunc-tables";
@@ -54,12 +58,34 @@
           #             };
         }
       );
-      checks = self.packages;
+      checks = forAllSystems (
+        system:
+        let
+          pkgs = nixpkgsFor.${system};
+        in
+        {
+          build = self.packages.${system}.dist;
+          lint =
+            pkgs.runCommand "lint"
+              {
+                nativeBuildInputs = [
+                  pkgs.haskellPackages.hlint
+                  pkgs.statix
+                ];
+              }
+              ''
+                cd ${self}
+                hlint app
+                statix check .
+                touch $out
+              '';
+        }
+      );
 
       devShells = forAllSystems (
         system:
         let
-          haskellPackages = nixpkgsFor.${system}.haskellPackages;
+          inherit (nixpkgsFor.${system}) haskellPackages;
         in
         {
           default = haskellPackages.shellFor {
