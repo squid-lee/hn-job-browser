@@ -7,7 +7,7 @@
 
 module HNI.Salience where
 
-import Brick.Span
+import Brick.Span hiding (getSpan)
 import Data.Array as A
 import Data.List
 import Data.Text (Text)
@@ -28,7 +28,8 @@ data Salient
 
 salients :: Post Decoded -> [Salient]
 salients p =
-  concatMap (\(mkTag, regexp) -> map (uncurry mkTag . toSpan) $ matchAllText regexp (payload (text p)))
+  removeSubsumed
+    . concatMap (\(mkTag, regexp) -> map (uncurry mkTag . toSpan) $ matchAllText regexp (payload (text p)))
     . concat
     $ [ location,
         remoteness,
@@ -49,11 +50,20 @@ salients p =
     r :: String -> Regex
     r = makeRegexOpts (defaultCompOpt {caseSensitive = True}) defaultExecOpt
 
-    -- 80k £80k 80k€ 80-130k€ £80k-£130k 80k-130k
+    curr = "[£$€]|USD|EUR|GBP"
+
+    -- Range: $150k - $200k, 100-150k, $200,000 - $245,000, 150-230k+
+    -- Open-ended: 200k+, $200k+
+    -- Single: £80k 80k€ (require k suffix to avoid matching $50mil funding)
     salary =
-      [ (Salary, i "([£$€][[:digit:]]{2,}k?)|([[:digit:]]{2,}[k€£$]+)"),
+      [ (Salary, i $ "(" <> curr <> ")[[:digit:],]+k[ ]*[-–—][ ]*(" <> curr <> ")?[[:digit:],]+k?\\+?"),
+        (Salary, i "[[:digit:]]{2,3}k?[ ]*[-–—][ ]*[[:digit:]]{2,3}k\\+?"),
+        (Salary, i $ "(" <> curr <> ")?[[:digit:]]{2,3}k\\+"),
+        (Salary, i $ "(" <> curr <> ")[[:digit:],]+k"),
+        (Salary, i "[[:digit:]]{2,}[k€£$]+"),
         (Salary, i "equity")
       ]
+
     url = [(URL, i "https?://[[:alnum:]]*\\.[[:alnum:].-]*[[:alnum:]]+(/[^ ,]*)?")]
     email = [(Email, i "[^@ ]+@[^@ .]+\\.[^@ ]+[^ @.,]")]
 
@@ -83,6 +93,14 @@ salients p =
         $ ["us"]
 
     purpose = [(Purpose, i "blockchain"), (Purpose, i "web3(.0)?"), (Purpose, i "nft")]
+
+removeSubsumed :: [Salient] -> [Salient]
+removeSubsumed sals = filter (not . subsumedByAny) sals
+  where
+    spans = map getSpan sals
+    subsumedByAny sal = any (subsumes (getSpan sal)) spans
+    subsumes (Span o1 l1) (Span o2 l2) =
+      o2 <= o1 && o1 + l1 <= o2 + l2 && (o1, l1) /= (o2, l2)
 
 getSpan :: Salient -> Span
 getSpan = \case
