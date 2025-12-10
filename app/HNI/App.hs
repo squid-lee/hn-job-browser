@@ -10,7 +10,7 @@ import Control.Monad.IO.Class (liftIO)
 import Data.List (nub)
 import Data.List.Zipper
 import qualified Data.Text as T
-import Graphics.Vty (Event (..), Key (..), defAttr)
+import Graphics.Vty (Event (..), Key (..))
 import Graphics.Vty.Attributes
 import HNI.Decoded
 import HNI.Post

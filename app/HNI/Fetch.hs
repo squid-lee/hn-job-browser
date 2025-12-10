@@ -10,27 +10,24 @@ import Network.HTTP.Client
 import Network.HTTP.Client.TLS
 import System.Directory
 
--- https://hacker-news.firebaseio.com/v0/item/8863.json?print=pretty
+baseUrl :: String
+baseUrl = "http://hn.algolia.com/api/v1/items/"
 
-fetch :: Int -> IO [Post Decoded]
-fetch = fmap decode . get . toUrl
-  where
-    decode x = either (\e -> error $ ppError x e) (children . fmap HNI.Decoded.decode) . eitherDecode $ x
-
-    ppError :: ByteString -> String -> String
-    ppError bs e = unlines [show bs, e]
-
-    baseUrl = "http://hn.algolia.com/api/v1/items/"
-    toUrl id = baseUrl ++ show id
+toUrl :: Int -> String
+toUrl n = baseUrl ++ show n
 
 get :: String -> IO ByteString
 get url = do
   manager <- newManager tlsManagerSettings
-
   request <- parseRequest url
   response <- httpLbs request manager
-
   return $ responseBody response
+
+decodeJSON :: ByteString -> [Post Decoded]
+decodeJSON x = either (\e -> error $ unlines [show x, e]) (children . fmap HNI.Decoded.decode) $ eitherDecode x
+
+fetch :: Int -> IO [Post Decoded]
+fetch = fmap decodeJSON . get . toUrl
 
 readCache :: Int -> IO (Maybe ByteString)
 readCache n = do
@@ -48,13 +45,10 @@ writeCache n bs = do
 
 fetchCached :: Int -> IO [Post Decoded]
 fetchCached n = do
-  bs <- readCache n
-  decode <$> maybe (trace "FETCHED" $ writeCache n =<< get (toUrl n)) pure bs
-  where
-    decode x = either (\e -> error $ ppError x e) (children . fmap HNI.Decoded.decode) . eitherDecode $ x
-
-    ppError :: ByteString -> String -> String
-    ppError bs e = unlines [show bs, e]
-
-    baseUrl = "http://hn.algolia.com/api/v1/items/"
-    toUrl id = baseUrl ++ show id
+  cached <- readCache n
+  case cached of
+    Just bs -> return $ decodeJSON bs
+    Nothing -> trace "FETCHED" $ do
+      bs <- get (toUrl n)
+      _ <- writeCache n bs
+      return $ decodeJSON bs

@@ -1,6 +1,5 @@
 module Brick.Span where
 
-import Brick
 import Data.Text (Text)
 import qualified Data.Text as T
 import qualified Graphics.Vty as V
@@ -17,13 +16,7 @@ splitSpan t (Span offset len) = (l, m, r)
     (l, m') = T.splitAt offset t
     (m, r) = T.splitAt len m'
 
--- Good for one line
-txtAttrSpan :: Span -> AttrName -> Text -> Widget n
-txtAttrSpan s attr t = hBox [txt l, withAttr attr (txt m), txt r]
-  where
-    (l, m, r) = splitSpan t s
-
--- Good for one line. Work backwards so you don't need to adjust spans after
+-- Work backwards so you don't need to adjust spans after
 txtAttrSpans :: V.Attr -> [(Span, V.Attr)] -> Text -> V.Image
 txtAttrSpans txtAttr spans = go (reverse spans)
   where
@@ -40,6 +33,3 @@ intersection (Span o1 l1) (Span o2 l2)
   where
     l = max o1 o2
     r = min (o1 + l1) (o2 + l2)
-
-shiftSpan :: Int -> Span -> Span
-shiftSpan left (Span o1 l1) = Span (o1 - left) l1
