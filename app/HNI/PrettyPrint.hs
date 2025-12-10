@@ -15,10 +15,11 @@ ppSalient =
       Salary x _ -> ("Salary", x)
       Remoteness x _ -> ("Remoteness", T.toTitle x)
       Tech x _ -> ("Tech", x)
+      Role x _ -> ("Role", T.toTitle x)
       URL x _ -> ("URL", x)
       Email x _ -> ("Email", x)
       Purpose x _ -> ("Purpose", x)
   where
-    ctors = ["Location", "Salary", "Remoteness", "Tech", "URL", "Email"]
+    ctors = ["Location", "Salary", "Remoteness", "Tech", "Role", "URL", "Email", "Purpose"]
     len = maximum $ map T.length ctors
     pad (ctor, val) = T.justifyLeft len ' ' ctor <> " " <> val

@@ -21,6 +21,7 @@ data Salient
   | Salary Text Span
   | Remoteness Text Span
   | Tech Text Span
+  | Role Text Span
   | URL Text Span
   | Email Text Span
   | Purpose Text Span
@@ -34,6 +35,7 @@ salients p =
     $ [ location,
         remoteness,
         salary,
+        role,
         url,
         email,
         purpose
@@ -83,7 +85,7 @@ salients p =
       i
         $ intercalate "|"
           . map (\s -> "\\b" <> s <> "\\b")
-        $ ["amsterdam", "netherlands", "berlin", "germany", "vienna", "austria", "bristol", "london", "uk", "canada", "nyc", "sf", "bay.?area", "global", "worldwide", "united states", "canada", "latin america", "europe", "lisbon", "portugal"]
+        $ ["amsterdam", "netherlands", "berlin", "germany", "vienna", "austria", "bristol", "london", "uk", "canada", "nyc", "sf", "bay.?area", "global", "worldwide", "united states", "canada", "latin america", "europe", "lisbon", "portugal", "stockholm", "sweden", "ghent", "belgium", "paris", "france"]
 
     knownPlacesR :: Regex
     knownPlacesR =
@@ -91,6 +93,15 @@ salients p =
         $ intercalate "|"
           . map (\s -> "\\b" <> s <> "\\b")
         $ ["us"]
+
+    role =
+      [ (Role, i "(senior|staff|principal|lead|junior|founding)[ -]*(software|frontend|backend|fullstack|full-stack|platform|data|ml|ai|devops|sre|infrastructure|systems?)[ -]*(engineer|developer)?"),
+        (Role, i "(software|frontend|backend|fullstack|full-stack|platform|data|ml|ai|devops|sre|infrastructure|systems?)[ -]*(engineer|developer)"),
+        (Role, i "(engineering|product|technical|tech)[ -]*manager"),
+        (Role, i "(data|ml|machine learning|ai)[ -]*(scientist|researcher)"),
+        (Role, i "\\b(cto|vp of engineering|head of engineering|tech lead|team lead)\\b"),
+        (Role, i "\\bswe\\b")
+      ]
 
     purpose = [(Purpose, i "blockchain"), (Purpose, i "web3(.0)?"), (Purpose, i "nft")]
 
@@ -108,6 +119,7 @@ getSpan = \case
   Salary _ s -> s
   Remoteness _ s -> s
   Tech _ s -> s
+  Role _ s -> s
   URL _ s -> s
   Email _ s -> s
   Purpose _ s -> s
