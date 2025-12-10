@@ -1,4 +1,4 @@
-module Brick.Highlight where
+module Brick.Highlight (txtWrapHighlight, fixUpsSpans, lineStarts) where
 
 import Brick
 import Brick.Span
@@ -15,9 +15,11 @@ txtWrapHighlight :: [(Span, AttrName)] -> WrapSettings -> T.Text -> Widget n
 txtWrapHighlight highlightSpans settings s =
   Widget Greedy Fixed $ do
     c <- getContext
-    let theLines = fixEmpty <$> wrapTextToLines settings (c ^. availWidthL) s
+    let wrappedLines = wrapTextToLines settings (c ^. availWidthL) s
+        theLines = fixEmpty <$> wrappedLines
 
-        theSpans = fixUpsSpans (map (\(s, an) -> (s, attrMapLookup an (c ^. ctxAttrMapL))) $ sortOn fst highlightSpans) theLines
+        -- Use original text to compute exact line start positions
+        theSpans = fixUpsSpans (map (\(s, an) -> (s, attrMapLookup an (c ^. ctxAttrMapL))) $ sortOn fst highlightSpans) s wrappedLines
 
         fixEmpty l
           | T.null l = " "
@@ -33,19 +35,37 @@ txtWrapHighlight highlightSpans settings s =
                in V.horizCat [txtAttrSpans (c ^. attrL) spans lStr, rPad]
          in return $ emptyResult & imageL .~ (V.horizCat [V.vertCat lineImgs, padding])
 
-fixUpsSpans :: (Show a) => [(Span, a)] -> [T.Text] -> [[(Span, a)]]
-fixUpsSpans ss ts = go ss ts (0, 0)
+-- Compute where each wrapped line starts in the original text
+lineStarts :: T.Text -> [T.Text] -> [Int]
+lineStarts original = go 0
   where
-    go [] _ _ = []
-    go _ [] _ = []
-    go spans' (t : ts) (cur, curOffset) = zip (map toLocal ss) xs : go (zip ss' xsRest) ts (cur + T.length t, newOffset)
+    go _ [] = []
+    go pos (line : rest)
+      | T.null line = pos : go pos rest -- empty line, position unchanged
+      | otherwise = case T.breakOn line (T.drop pos original) of
+          (before, _) -> (pos + T.length before) : go (pos + T.length before + T.length line) rest
+
+fixUpsSpans :: (Show a) => [(Span, a)] -> T.Text -> [T.Text] -> [[(Span, a)]]
+fixUpsSpans ss original ts = go ss (zip (lineStarts original ts) ts)
+  where
+    go [] _ = []
+    go _ [] = []
+    go spans' ((lineStart, t) : rest) = localSpans : go nextSpans rest
       where
-        newOffset = if T.all isSpace t then curOffset else curOffset + 1
+        lineEnd = lineStart + T.length t
+        lineSpan = Span lineStart (T.length t)
 
         (spans, xs) = unzip spans'
-        xsRest = drop (length ss) xs
+        (intersecting, notYet) = span (\s -> isJust $ intersection s lineSpan) spans
+        (xsInt, xsNotYet) = splitAt (length intersecting) xs
 
-        (ss, ss') = span (\s -> isJust $ intersection s lineSpan) spans
-        lineSpan = Span (cur + curOffset) $ T.length t
+        toLocalClipped (Span o l) =
+          let o' = max 0 (o - lineStart)
+              end = min (o + l - lineStart) (T.length t)
+           in Span o' (max 0 (end - o'))
 
-        toLocal = shiftSpan (cur + curOffset)
+        localSpans = zip (map toLocalClipped intersecting) xsInt
+
+        extendsPast (Span o l) = o + l > lineEnd
+        continuing = [(s, x) | (s, x) <- zip intersecting xsInt, extendsPast s]
+        nextSpans = continuing ++ zip notYet xsNotYet
