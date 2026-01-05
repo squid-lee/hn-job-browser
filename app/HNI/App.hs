@@ -11,6 +11,7 @@ import Brick.Widgets.Border
 import Brick.Widgets.Border.Style
 import Control.Monad (when)
 import Control.Monad.IO.Class (liftIO)
+import Data.Char (isDigit)
 import Data.List (nub)
 import Data.List.Zipper
 import qualified Data.Text as T
@@ -19,7 +20,8 @@ import Graphics.Vty.Attributes
 import HNI.Decoded
 import HNI.Post
 import HNI.PrettyPrint
-import HNI.Salience
+import HNI.Rank
+import HNI.Features
 import System.Clipboard
 import System.Process
 import Text.Wrap (defaultWrapSettings)
@@ -55,7 +57,7 @@ getPosition z =
         | beginp zp = acc
         | otherwise = countBack (left zp) (acc + 1)
       currentPos = countBack z 1
-  in (currentPos, totalCount)
+   in (currentPos, totalCount)
 
 appEvent :: BrickEvent () e -> EventM () State ()
 appEvent (VtyEvent e) =
@@ -76,8 +78,9 @@ appEvent (VtyEvent e) =
       s <- get
       let targetPos = jumpBuffer s - 1
       when (targetPos >= 0) $
-        modify $ \st -> st {posts = jumpTo targetPos $ posts st, jumpBuffer = 0}
-    EvKey (KChar c) [] | c >= '0' && c <= '9' -> do
+        modify $
+          \st -> st {posts = jumpTo targetPos $ posts st, jumpBuffer = 0}
+    EvKey (KChar c) [] | isDigit c -> do
       let digit = read [c] :: Int
       modify $ \s -> s {jumpBuffer = jumpBuffer s * 10 + digit}
     EvKey (KChar 'q') [] -> halt
@@ -96,7 +99,7 @@ drawFooter s =
   let (current, total) = getPosition (posts s)
       counterText = T.pack $ show current ++ " / " ++ show total
       bufferText = if jumpBuffer s > 0 then T.pack (show (jumpBuffer s)) else ""
-  in hBox [fill ' ', txt bufferText, txt " ", txt counterText]
+   in hBox [fill ' ', txt bufferText, txt " ", txt counterText]
 
 drawPost :: Post Decoded -> Widget ()
 drawPost p@Post {..} =
@@ -105,12 +108,12 @@ drawPost p@Post {..} =
       (padLeftRight 2 . withBorderStyle unicode . border)
       [ vBox [txtWrap $ T.unwords [author, createdAt], txtWrapHighlight highlights defaultWrapSettings $ payload text],
         txtWrap $
-          T.unlines . nub . map ppSalient $
-            ss
+          T.unlines . (T.pack (">>> SCORE: " <> show (rank fs) <> " <<<") :) . ("" :) . nub . map ppFeature $
+            fs
       ]
   where
-    highlights = color $ map getSpan ss
-    ss = salients p
+    highlights = color $ map getSpan fs
+    fs = features p
 
 color :: [a] -> [(a, AttrName)]
 color xs = zip xs $ cycle highlightAttrNames

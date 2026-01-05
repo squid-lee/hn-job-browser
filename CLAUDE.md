@@ -31,7 +31,7 @@ TUI application for browsing Hacker News "Who's Hiring" threads. Fetches thread 
 - `HNI.Fetch` - HTTP fetching from `hn.algolia.com/api/v1/items/<id>` with file-based caching in `/tmp/hn-cache/`
 - `HNI.Post` - Aeson-derived `Post body` type representing HN comments (recursive via `children`)
 - `HNI.Decoded` - HTML entity decoding and tag stripping for raw post text
-- `HNI.Salience` - Regex-based extraction of job-relevant spans (salary, location, remote, URLs, emails)
+- `HNI.Features` - Regex-based extraction of job-relevant spans (salary, location, remote, URLs, emails)
 - `HNI.App` - Brick TUI: navigation (n/p), copy text (w), open in browser (o)
 - `Brick.Span` - Text span operations for highlighting regions
 - `Brick.Highlight` - Word-wrapping widget that preserves highlight spans across line breaks
